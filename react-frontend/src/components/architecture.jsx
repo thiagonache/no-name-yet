@@ -8,14 +8,18 @@ class Architecture extends Component {
           <h1 className="display-4">Architecture</h1>
           <p className="lead">
             I'm going to be using{" "}
-            <a href="https://cloud.google.com/gcp/" target="_blank">
+            <a
+              href="https://cloud.google.com/gcp/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Google Cloud Services
             </a>{" "}
             for developing this solution. The priority is to use serverless
             technology, but when not available or if it does not fit, a no-ops
             solution will be adopted.
           </p>
-          <img src="/no-name-yet.png" />
+          <img src="/no-name-yet.png" alt="Core components" />
         </div>
       </div>
     );

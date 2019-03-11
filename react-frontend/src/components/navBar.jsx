@@ -1,9 +1,9 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-const NavBar = () => {
+const NavBar = ({ user }) => {
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav className="navbar navbar-expand-md navbar-dark bg-dark">
       <div className="collapse navbar-collapse" id="navbarText">
         <ul className="navbar-nav mr-auto">
           <li className="nav-item">
@@ -26,17 +26,35 @@ const NavBar = () => {
               Poll
             </NavLink>
           </li>
+          {!user && (
+            <React.Fragment>
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/register">
+                  Register
+                </NavLink>
+              </li>
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/login">
+                  Login
+                </NavLink>
+              </li>
+            </React.Fragment>
+          )}
+          {user && (
+            <React.Fragment>
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/logout">
+                  Logout
+                </NavLink>
+              </li>
+            </React.Fragment>
+          )}
           <li className="nav-item">
             <NavLink className="nav-link" to="/about">
               About
             </NavLink>
           </li>
         </ul>
-        <span className="navbar-text">
-          <a href="https://github.com/thiagonache/no-name-yet" target="_blank">
-            Source code
-          </a>
-        </span>
       </div>
     </nav>
   );

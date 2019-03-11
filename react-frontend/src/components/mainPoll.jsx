@@ -1,65 +1,89 @@
 import React, { Component } from "react";
-import Poll from "react-polls";
-import { getVotes, incrementVotes } from "../services/pollService";
-
-const pollQuestion1 = "Are you interested?";
+import _ from "lodash";
+import { getAnswers, getPolls, incrementVotes } from "../services/pollService";
+import AnswerForm from "./answerForm";
+import PollTable from "./pollTable";
 
 class MainPoll extends Component {
   state = {
-    pollAnswers1: [{ option: "Yes", votes: 0 }, { option: "No", votes: 0 }]
-  };
-
-  handleVote = (voteAnswer, pollAnswers, pollNumber) => {
-    let total = 0;
-    const newPollAnswers = pollAnswers.map(answer => {
-      if (answer.option === voteAnswer) answer.votes++;
-      total += answer.votes;
-
-      return answer;
-    });
-
-    if (pollNumber === 1) {
-      this.setState({
-        pollAnswers1: newPollAnswers
-      });
-      try {
-        incrementVotes(voteAnswer.toLowerCase());
-      } catch (ex) {
-        console.log(ex);
-      }
-
-      // } else {
-      //   this.setState({
-      //     pollAnswers2: newPollAnswers
-      //   });
-    }
+    pollQuestion: "",
+    pollAnswers: [],
+    sortColumn: { path: "description", order: "asc" }
   };
 
   async componentDidMount() {
-    const { pollAnswers1 } = this.state;
-    const { data: votesYes } = await getVotes("yes");
-    const { data: votesNo } = await getVotes("no");
-    const newPollAnswers = pollAnswers1.map(answer => {
-      if (answer.option === "Yes") answer.votes = votesYes.votes;
-      else if (answer.option === "No") answer.votes = votesNo.votes;
-      return answer;
+    const { data: answers } = await getAnswers();
+    const { data: polls } = await getPolls();
+    let total = 0;
+
+    answers["items"].map(item => {
+      total += item.votes;
+      return total;
     });
 
     this.setState({
-      pollAnswers1: newPollAnswers
+      pollAnswers: answers.items,
+      pollQuestion: polls.items[0]["name"],
+      total: total
     });
   }
 
+  handleVote = voteAnswer => {
+    const { pollAnswers } = this.state;
+    let total = 0;
+    const newPollAnswers = pollAnswers.map(answer => {
+      if (answer.description === voteAnswer) answer.votes++;
+      total += answer.votes;
+      return answer;
+    });
+
+    try {
+      incrementVotes(voteAnswer);
+    } catch (ex) {
+      console.log(ex);
+    }
+
+    this.setState({
+      pollAnswers: newPollAnswers,
+      total: total
+    });
+  };
+
+  handleSort = sortColumn => {
+    this.setState({ sortColumn });
+  };
+
   render() {
-    const { pollAnswers1 } = this.state;
+    const { pollAnswers, pollQuestion, total, sortColumn } = this.state;
+    const sorted = _.orderBy(
+      pollAnswers,
+      [sortColumn.path],
+      [sortColumn.order]
+    );
+
     return (
-      <div>
-        <Poll
-          question={pollQuestion1}
-          answers={pollAnswers1}
-          onVote={voteAnswer => this.handleVote(voteAnswer, pollAnswers1, 1)}
-        />
-      </div>
+      <React.Fragment>
+        {this.props.user === null && (
+          <div className="alert alert-dark my-lg-0 " role="alert">
+            Log in to be able to add new answers. The vote is anonymous.
+          </div>
+        )}
+        {this.props.user !== null && <AnswerForm question={pollQuestion} />}
+        <div className="m-4 d-flex justify-content-center">
+          <h2>{pollQuestion}</h2>
+        </div>
+        <div className="m-4 d-flex justify-content-center">
+          <PollTable
+            pollAnswers={sorted}
+            sortColumn={sortColumn}
+            onSort={this.handleSort}
+            onVoteIncrement={this.handleVote}
+          />
+        </div>
+        <div className="m-4 d-flex justify-content-center">
+          Total votes: {total}
+        </div>
+      </React.Fragment>
     );
   }
 }

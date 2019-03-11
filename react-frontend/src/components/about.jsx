@@ -10,6 +10,11 @@ class About extends Component {
             I'm system administrator and will write more about me when inspired
             :P
           </p>
+          <h1 className="display-4">Source code</h1>
+          <p>
+            You can found it{" "}
+            <a href="https://github.com/thiagonache/no-name-yet">here</a>.
+          </p>
         </div>
       </div>
     );
